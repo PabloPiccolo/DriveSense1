@@ -1,0 +1,21 @@
+package com.hivesense.hivesense.service;
+
+import com.hivesense.hivesense.entity.User;
+import com.hivesense.hivesense.repository.UserRepository;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+
+@Service
+public class UserService {
+
+    private final UserRepository userRepository;
+
+    public UserService(UserRepository userRepository) {
+        this.userRepository = userRepository;
+    }
+
+   public List<User> getAllUsers(){
+    return userRepository.findAll();
+   }
+}
