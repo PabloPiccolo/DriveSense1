@@ -15,4 +15,6 @@ public interface TemperatureRepository extends JpaRepository<Temperature, Long> 
             LocalDateTime start,
             LocalDateTime end
     );
+
+    void deleteByDeviceId(Long deviceId);
 }

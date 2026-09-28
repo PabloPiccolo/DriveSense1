@@ -29,19 +29,25 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
 @Table(name = "users")
 public class User {
 
-    @Id
-    private Long id;
+   @Id
+@GeneratedValue(strategy = GenerationType.IDENTITY)
+private Long id;
 
     private String login;
 
     private String email;
 
-    private String password;
+    @JsonIgnore
+private String password;
+    
 
     @Column(name = "`apiKey`")
 private String apiKey;

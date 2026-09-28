@@ -53,4 +53,20 @@ public List<Temperature> getTemperatures(
             parsedDate
     );
 }
+
+
+
+@DeleteMapping("/{deviceName}")
+public String deleteDevice(
+        @RequestParam String apiKey,
+        @PathVariable String deviceName
+) {
+
+    User user = userRepository.findByApiKey(apiKey)
+            .orElseThrow(() -> new RuntimeException("Invalid API key"));
+
+    deviceService.deleteDevice(user.getId(), deviceName);
+
+    return "Urządzenie zostało usunięte";
+}
 }
