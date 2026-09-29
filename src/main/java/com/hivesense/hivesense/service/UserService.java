@@ -8,6 +8,7 @@ import com.hivesense.hivesense.repository.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import com.hivesense.hivesense.service.JwtService;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
@@ -84,24 +85,27 @@ public String loginUser(String login, String password) {
     );
 }
 
-    public void deleteUser(Long userId) {
+   @Transactional
+public void deleteUser(String login) {
 
-        User user = userRepository.findById(userId).orElse(null);
+    User user = userRepository.findByLogin(login)
+            .orElseThrow(() -> new RuntimeException("Użytkownik nie istnieje"));
 
-        if (user == null) {
-            throw new RuntimeException("Użytkownik nie istnieje");
-        }
+    Long userId = user.getId();
 
-        List<Device> devices = deviceRepository.findByUserId(userId);
+    List<Device> devices = deviceRepository.findByUserId(userId);
 
-        for (Device device : devices) {
-            temperatureRepository.deleteByDeviceId(device.getId());
-        }
-
-        deviceRepository.deleteAll(devices);
-
-        userRepository.delete(user);
+    for (Device device : devices) {
+        temperatureRepository.deleteByDeviceId(device.getId());
     }
+
+    deviceRepository.deleteAll(devices);
+
+    userRepository.delete(user);
+}
+
+
+
     public void changePassword(
         String login,
         String oldPassword,

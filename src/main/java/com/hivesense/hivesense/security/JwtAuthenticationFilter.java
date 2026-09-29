@@ -23,40 +23,55 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
 
     @Override
-    protected void doFilterInternal(
-            HttpServletRequest request,
-            HttpServletResponse response,
-            FilterChain filterChain
-    ) throws ServletException, IOException {
+protected void doFilterInternal(
+        HttpServletRequest request,
+        HttpServletResponse response,
+        FilterChain filterChain
+) throws ServletException, IOException {
 
-        String authHeader = request.getHeader("Authorization");
+    String authHeader = request.getHeader("Authorization");
 
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            filterChain.doFilter(request, response);
-            return;
-        }
+    System.out.println(
+            "JWT FILTER: " +
+            request.getMethod() +
+            " " +
+            request.getRequestURI()
+    );
 
-        String token = authHeader.substring(7);
-
-        try {
-            String login = jwtService.extractLogin(token);
-
-            UsernamePasswordAuthenticationToken authentication =
-                    new UsernamePasswordAuthenticationToken(
-                            login,
-                            null,
-                            Collections.emptyList()
-                    );
-
-            SecurityContextHolder
-                    .getContext()
-                    .setAuthentication(authentication);
-
-        } catch (Exception e) {
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            return;
-        }
-
+    // ESP32 wysyła apiKey zamiast JWT
+    if (request.getRequestURI().equals("/temperatures")) {
         filterChain.doFilter(request, response);
+        return;
     }
+
+    if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+        filterChain.doFilter(request, response);
+        return;
+    }
+
+    String token = authHeader.substring(7);
+
+    try {
+        String login = jwtService.extractLogin(token);
+
+        UsernamePasswordAuthenticationToken authentication =
+                new UsernamePasswordAuthenticationToken(
+                        login,
+                        null,
+                        Collections.emptyList()
+                );
+
+        SecurityContextHolder
+                .getContext()
+                .setAuthentication(authentication);
+
+    } catch (Exception e) {
+        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        return;
+    }
+
+    filterChain.doFilter(request, response);
+}
+
+
 }

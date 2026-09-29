@@ -4,6 +4,7 @@ import com.hivesense.hivesense.entity.Device;
 import com.hivesense.hivesense.repository.DeviceRepository;
 import com.hivesense.hivesense.repository.TemperatureRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -29,6 +30,7 @@ public class DeviceService {
         return deviceRepository.findByUserId(userId);
     }
 
+    @Transactional
     public void deleteDevice(Long userId, String deviceName) {
 
         Device device = deviceRepository

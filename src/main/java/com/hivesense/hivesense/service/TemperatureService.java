@@ -35,10 +35,16 @@ public class TemperatureService {
     }
 
     public Temperature saveTemperature(
-            String apiKey,
-            String deviceName,
-            Double temperature
-    ) {
+        String apiKey,
+        String deviceName,
+        Double temperature
+) {
+
+    if (temperature == null || temperature < -50 || temperature > 180) {
+        throw new RuntimeException(
+                "Temperatura musi być w zakresie od -50 do 180°C"
+        );
+    }
 
         // 1. Znajdź użytkownika po apiKey
         User user = userRepository.findByApiKey(apiKey)

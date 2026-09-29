@@ -1,7 +1,10 @@
 package com.hivesense.hivesense.controller;
 
 import com.hivesense.hivesense.entity.User;
+import com.hivesense.hivesense.dto.LoginRequest;
+import com.hivesense.hivesense.dto.RegisterRequest;
 import com.hivesense.hivesense.service.UserService;
+import com.hivesense.hivesense.dto.ChangePasswordRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -37,31 +40,40 @@ public ResponseEntity<?> getCurrentUser(
 }
 
     @PostMapping("/register")
-    public ResponseEntity<?> registerUser(
-            @RequestParam String login,
-            @RequestParam String email,
-            @RequestParam String password
-    ) {
-
-        try {
-            User user = userService.registerUser(login, email, password);
-            return ResponseEntity.ok(user);
-
-        } catch (RuntimeException e) {
-            return ResponseEntity
-                    .status(HttpStatus.BAD_REQUEST)
-                    .body(e.getMessage());
-        }
-    }
-
-    @PostMapping("/login")
-public ResponseEntity<?> loginUser(
-        @RequestParam String login,
-        @RequestParam String password
+public ResponseEntity<?> registerUser(
+        @RequestBody RegisterRequest request
 ) {
 
     try {
-        String token = userService.loginUser(login, password);
+
+        User user = userService.registerUser(
+                request.getLogin(),
+                request.getEmail(),
+                request.getPassword()
+        );
+
+        return ResponseEntity.ok(user);
+
+    } catch (RuntimeException e) {
+
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(e.getMessage());
+    }
+}
+
+    
+    @PostMapping("/login")
+public ResponseEntity<?> loginUser(
+        @RequestBody LoginRequest request
+) {
+
+    try {
+
+        String token = userService.loginUser(
+                request.getLogin(),
+                request.getPassword()
+        );
 
         return ResponseEntity.ok(
                 java.util.Map.of(
@@ -77,26 +89,31 @@ public ResponseEntity<?> loginUser(
     }
 }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteUser(@PathVariable Long id) {
+    @DeleteMapping("/me")
+public ResponseEntity<?> deleteCurrentUser(
+        Authentication authentication
+) {
 
-        try {
-            userService.deleteUser(id);
+    try {
 
-            return ResponseEntity.ok("Konto zostało usunięte");
+        String login = authentication.getName();
 
-        } catch (RuntimeException e) {
-            return ResponseEntity
-                    .status(HttpStatus.NOT_FOUND)
-                    .body(e.getMessage());
-        }
+        userService.deleteUser(login);
+
+        return ResponseEntity.ok("Konto zostało usunięte");
+
+    } catch (RuntimeException e) {
+
+        return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
+                .body(e.getMessage());
     }
+}
 
-   @PutMapping("/change-password")
+    @PutMapping("/change-password")
 public ResponseEntity<?> changePassword(
         Authentication authentication,
-        @RequestParam String oldPassword,
-        @RequestParam String newPassword
+        @RequestBody ChangePasswordRequest request
 ) {
 
     try {
@@ -105,8 +122,8 @@ public ResponseEntity<?> changePassword(
 
         userService.changePassword(
                 login,
-                oldPassword,
-                newPassword
+                request.getOldPassword(),
+                request.getNewPassword()
         );
 
         return ResponseEntity.ok("Hasło zostało zmienione");
@@ -118,4 +135,6 @@ public ResponseEntity<?> changePassword(
                 .body(e.getMessage());
     }
 }
+
+
 }
