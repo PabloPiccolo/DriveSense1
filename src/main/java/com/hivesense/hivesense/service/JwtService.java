@@ -26,6 +26,7 @@ public class JwtService {
         return Jwts.builder()
                 .subject(login)
                 .claim("userId", userId)
+                .claim("login", login)
                 .issuedAt(now)
                 .expiration(expiration)
                 .signWith(secretKey)
