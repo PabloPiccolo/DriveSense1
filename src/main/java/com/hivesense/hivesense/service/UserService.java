@@ -9,6 +9,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import com.hivesense.hivesense.service.JwtService;
 import org.springframework.transaction.annotation.Transactional;
+import com.hivesense.hivesense.dto.LoginResponse;
 
 import java.util.List;
 import java.util.UUID;
@@ -67,7 +68,7 @@ public class UserService {
         return userRepository.save(user);
     }
 
-public String loginUser(String login, String password) {
+public LoginResponse loginUser(String login, String password) {
 
     User user = userRepository.findByLogin(login).orElse(null);
 
@@ -79,9 +80,17 @@ public String loginUser(String login, String password) {
         throw new RuntimeException("Nieprawidłowy login lub hasło");
     }
 
-    return jwtService.generateToken(
+    String token = jwtService.generateToken(
             user.getId(),
             user.getLogin()
+    );
+
+    return new LoginResponse(
+            user.getId(),
+            user.getLogin(),
+            user.getEmail(),
+            user.getApiKey(),
+            token
     );
 }
 

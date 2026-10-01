@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import com.hivesense.hivesense.dto.LoginResponse;
 
 import java.util.List;
 
@@ -36,10 +37,13 @@ public ResponseEntity<?> getCurrentUser(
 
     User user = userService.getUserByLogin(login);
 
-    return ResponseEntity.ok(user);
+    return ResponseEntity.ok(
+        java.util.Map.of(
+                "user", user
+        )
+);
 }
-
-    @PostMapping("/register")
+@PostMapping("/register")
 public ResponseEntity<?> registerUser(
         @RequestBody RegisterRequest request
 ) {
@@ -52,7 +56,14 @@ public ResponseEntity<?> registerUser(
                 request.getPassword()
         );
 
-        return ResponseEntity.ok(user);
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(
+                        java.util.Map.of(
+                                "message", "Konto zostało utworzone",
+                                "user", user
+                        )
+                );
 
     } catch (RuntimeException e) {
 
@@ -61,6 +72,7 @@ public ResponseEntity<?> registerUser(
                 .body(e.getMessage());
     }
 }
+   
 
     
     @PostMapping("/login")
@@ -70,16 +82,17 @@ public ResponseEntity<?> loginUser(
 
     try {
 
-        String token = userService.loginUser(
-                request.getLogin(),
-                request.getPassword()
-        );
+        LoginResponse response = userService.loginUser(
+        request.getLogin(),
+        request.getPassword()
+);
 
-        return ResponseEntity.ok(
-                java.util.Map.of(
-                        "token", token
-                )
-        );
+return ResponseEntity.ok(
+        java.util.Map.of(
+                "message", "Zalogowano pomyślnie",
+                "user", response
+        )
+);
 
     } catch (RuntimeException e) {
 
